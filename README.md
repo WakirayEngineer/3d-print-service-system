@@ -37,7 +37,9 @@ The goal of this project is to simplify the creation of professional service ord
 
 ## Preview
 
-Add screenshots of the system here.
+<img width="853" height="1285" alt="Captura de tela 2026-05-26 215137" src="https://github.com/user-attachments/assets/7e20edde-5017-46f5-8967-fcef254a1b4e" />
+
+<img width="492" height="707" alt="Captura de tela 2026-05-26 215330" src="https://github.com/user-attachments/assets/0aa779ca-284d-4791-a9f8-022986374c09" />
 
 ## Future Improvements
 
