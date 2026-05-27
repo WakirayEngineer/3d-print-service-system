@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Ordem de Serviço - Impressão 3D</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #e9e9e9;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: auto;
+      background: white;
+      padding: 35px;
+      border-radius: 10px;
+      border: 2px solid #000;
+      box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid black;
+      padding-bottom: 15px;
+    }
+
+    .linha {
+      display: flex;
+      gap: 15px;
+    }
+
+    .campo {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #999;
+      border-radius: 5px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+
+    textarea {
+      height: 140px;
+      resize: vertical;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      margin-top: 30px;
+      background: black;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    #preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    #preview img {
+      width: 140px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .assinatura-area {
+      margin-top: 60px;
+    }
+
+    .assinatura-box {
+      margin-top: 50px;
+      text-align: center;
+    }
+
+    .linha-assinatura {
+      border-top: 1px solid black;
+      width: 300px;
+      margin: auto;
+      padding-top: 5px;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>ORDEM DE SERVIÇO - IMPRESSÃO 3D</h1>
+
+    <div class="linha">
+
+      <div class="campo">
+        <label>Nome do Cliente</label>
+        <input type="text" id="cliente">
+      </div>
+
+      <div class="campo">
+        <label>RG / CPF</label>
+        <input type="text" id="documento">
+      </div>
+
+    </div>
+
+    <label>Endereço</label>
+    <input type="text" id="endereco">
+
+    <div class="linha">
+
+      <div class="campo">
+        <label>Data</label>
+        <input type="date" id="data">
+      </div>
+
+      <div class="campo">
+        <label>Hora de Início</label>
+        <input type="time" id="inicio">
+      </div>
+
+      <div class="campo">
+        <label>Hora de Término</label>
+        <input type="time" id="fim">
+      </div>
+
+      <div class="campo">
+        <label>Valor (R$)</label>
+        <input type="number" id="valor" step="0.01">
+      </div>
+
+    </div>
+
+    <label>Descrição do Serviço</label>
+    <textarea id="descricao"></textarea>
+
+    <label>Fotos da Peça</label>
+    <input type="file" id="fotos" multiple accept="image/*">
+
+    <div id="preview"></div>
+
+    <div class="assinatura-area">
+
+      <div class="linha">
+
+        <div class="campo">
+          <label>Nome do Responsável</label>
+          <input type="text" id="responsavel">
+        </div>
+
+        <div class="campo">
+          <label>RG / CPF Responsável</label>
+          <input type="text" id="responsavelDoc">
+        </div>
+
+      </div>
+
+      <label>Número do CREA</label>
+      <input type="text" id="crea">
+
+      <div class="assinatura-box">
+
+        <div class="linha-assinatura">
+          Assinatura do Responsável
+        </div>
+
+      </div>
+
+    </div>
+
+    <button onclick="gerarPDF()">BAIXAR PDF</button>
+
+  </div>
+
+  <script>
+
+    const fotosInput = document.getElementById('fotos');
+    const preview = document.getElementById('preview');
+
+    let imagensBase64 = [];
+
+    fotosInput.addEventListener('change', function(event) {
+
+      preview.innerHTML = '';
+      imagensBase64 = [];
+
+      const files = event.target.files;
+
+      for (let file of files) {
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+
+          imagensBase64.push(e.target.result);
+
+          const img = document.createElement('img');
+
+          img.src = e.target.result;
+
+          preview.appendChild(img);
+        }
+
+        reader.readAsDataURL(file);
+      }
+    });
+
+    async function gerarPDF() {
+
+      const { jsPDF } = window.jspdf;
+
+      const doc = new jsPDF();
+
+      const cliente = document.getElementById('cliente').value;
+      const documento = document.getElementById('documento').value;
+      const endereco = document.getElementById('endereco').value;
+
+      const data = document.getElementById('data').value;
+      const inicio = document.getElementById('inicio').value;
+      const fim = document.getElementById('fim').value;
+
+      const valor = document.getElementById('valor').value;
+      const descricao = document.getElementById('descricao').value;
+
+      const responsavel = document.getElementById('responsavel').value;
+      const responsavelDoc = document.getElementById('responsavelDoc').value;
+      const crea = document.getElementById('crea').value;
+
+      // BORDA PDF
+
+      doc.rect(10, 10, 190, 277);
+
+      let y = 20;
+
+      // TÍTULO
+
+      doc.setFontSize(18);
+      doc.text("ORDEM DE SERVIÇO - IMPRESSÃO 3D", 20, y);
+
+      y += 15;
+
+      doc.line(20, y, 190, y);
+
+      y += 15;
+
+      doc.setFontSize(12);
+
+      doc.text(`Cliente: ${cliente}`, 20, y);
+      y += 10;
+
+      doc.text(`RG/CPF: ${documento}`, 20, y);
+      y += 10;
+
+      doc.text(`Endereço: ${endereco}`, 20, y);
+      y += 15;
+
+      doc.text(`Data: ${data}`, 20, y);
+      doc.text(`Início: ${inicio}`, 80, y);
+      doc.text(`Término: ${fim}`, 140, y);
+
+      y += 15;
+
+      doc.text(`Valor do Serviço: R$ ${valor}`, 20, y);
+
+      y += 15;
+
+      doc.text("Descrição do Serviço:", 20, y);
+
+      y += 10;
+
+      const descricaoLinhas = doc.splitTextToSize(descricao, 165);
+
+      doc.text(descricaoLinhas, 20, y);
+
+      y += descricaoLinhas.length * 7 + 15;
+
+      // IMAGENS
+
+      if (imagensBase64.length > 0) {
+
+        doc.text("Fotos da Peça:", 20, y);
+
+        y += 10;
+
+        let posX = 20;
+
+        for (let i = 0; i < imagensBase64.length; i++) {
+
+          doc.addImage(imagensBase64[i], 'JPEG', posX, y, 50, 50);
+
+          posX += 60;
+
+          if (posX > 140) {
+
+            posX = 20;
+            y += 60;
+          }
+        }
+
+        y += 70;
+      }
+
+      // RESPONSÁVEL
+
+      doc.text(`Responsável: ${responsavel}`, 20, y);
+
+      y += 10;
+
+      doc.text(`RG/CPF Responsável: ${responsavelDoc}`, 20, y);
+
+      y += 10;
+
+      doc.text(`CREA: ${crea}`, 20, y);
+
+      y += 40;
+
+      // ASSINATURA
+
+      doc.line(60, y, 150, y);
+
+      y += 8;
+
+      doc.text("Assinatura do Responsável", 80, y);
+
+      doc.save("ordem_servico_3d.pdf");
+    }
+
+  </script>
+
+</body>
+
+</html>
